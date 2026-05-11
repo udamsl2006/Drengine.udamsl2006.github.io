@@ -1,0 +1,858 @@
+
+:root {
+  /* Palette */
+  --drn-void:       #04010d;
+  --drn-nebula:     #0d0621;
+  --drn-iris:       #5b21b6;
+  --drn-aurora:     #a855f7;
+  --drn-cyan:       #06b6d4;
+  --drn-rose:       #f43f5e;
+  --drn-gold:       #fbbf24;
+  --drn-white:      #ffffff;
+  --drn-mist:       rgba(255,255,255,0.06);
+
+  /* Typography */
+  --drn-font-display: 'Syne', 'Abril Fatface', Georgia, serif;
+  --drn-font-body:    'DM Sans', 'Outfit', system-ui, sans-serif;
+  --drn-font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Timing */
+  --drn-t-fast:   160ms;
+  --drn-t-mid:    380ms;
+  --drn-t-slow:   700ms;
+  --drn-t-dream:  900ms;
+
+  /* Easing */
+  --drn-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --drn-ease-dream:  cubic-bezier(0.76, 0, 0.24, 1);
+  --drn-ease-soft:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.drn-scene {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background: var(--drn-void);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. MORPH — Fluid Shapes & Morphing UI
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Blob base ───────────────────────────────────────────────────── */
+.drn-blob {
+  display:   inline-block;
+  position:  relative;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  transition: border-radius 1.2s ease-in-out, background 1s ease;
+  will-change: border-radius, background;
+  overflow: hidden;
+}
+
+.drn-blob::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(ellipse at 20% 20%,
+    rgba(255,255,255,0.35) 0%,
+    transparent 60%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Ripple ──────────────────────────────────────────────────────── */
+.drn-ripple {
+  position:     absolute;
+  transform:    translate(-50%, -50%) scale(0);
+  width:        var(--r, 200px);
+  height:       var(--r, 200px);
+  border-radius: 50%;
+  background:   radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
+  pointer-events: none;
+  animation:    drn-ripple-expand 700ms var(--drn-ease-dream) forwards;
+}
+
+@keyframes drn-ripple-expand {
+  to { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+/* ── Morph text scramble — no specific class needed, handled by JS ── */
+
+/* ── Fluid border shape utility ─────────────────────────────────── */
+.drn-morph-border {
+  animation: drn-morph-shape 8s ease-in-out infinite;
+}
+
+@keyframes drn-morph-shape {
+  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50%     { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+  75%     { border-radius: 70% 30% 50% 40% / 40% 50% 60% 50%; }
+}
+
+/* ── Liquid hover button ─────────────────────────────────────────── */
+.drn-btn-morph {
+  position:   relative;
+  display:    inline-block;
+  padding:    0.7em 2em;
+  border:     none;
+  cursor:     pointer;
+  font-family: var(--drn-font-body);
+  font-size:  1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color:      var(--drn-white);
+  background: linear-gradient(135deg, var(--drn-iris), var(--drn-aurora));
+  border-radius: 50px;
+  overflow:   hidden;
+  transition: border-radius var(--drn-t-mid) var(--drn-ease-spring),
+              transform      var(--drn-t-fast) ease,
+              box-shadow     var(--drn-t-mid) ease;
+}
+
+.drn-btn-morph::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--drn-cyan), var(--drn-aurora));
+  opacity: 0;
+  transition: opacity var(--drn-t-mid) ease;
+  border-radius: inherit;
+}
+
+.drn-btn-morph:hover {
+  border-radius: 8px 40px 8px 40px;
+  transform: scale(1.04) translateY(-2px);
+  box-shadow: 0 12px 40px rgba(168, 85, 247, 0.5),
+              0 4px 16px rgba(6, 182, 212, 0.3);
+}
+.drn-btn-morph:hover::before { opacity: 1; }
+.drn-btn-morph:active { transform: scale(0.97); }
+
+.drn-btn-morph span { position: relative; z-index: 1; }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. GLASS — Glassmorphism
+   ═══════════════════════════════════════════════════════════════════ */
+
+.drn-glass {
+  --drn-blur:   18px;
+  --drn-tint:   rgba(255,255,255,0.12);
+  --drn-border: 1px solid rgba(255,255,255,0.25);
+  --drn-shadow: 0 8px 32px rgba(0,0,0,0.25);
+
+  backdrop-filter:         blur(var(--drn-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--drn-blur)) saturate(180%);
+  background:   var(--drn-tint);
+  border:       var(--drn-border);
+  box-shadow:   var(--drn-shadow);
+  border-radius: 18px;
+  position:     relative;
+  overflow:     hidden;
+  transition:   transform var(--drn-t-mid) var(--drn-ease-spring),
+                box-shadow var(--drn-t-mid) ease;
+  will-change:  transform;
+}
+
+/* Depth variants */
+.drn-glass--flat    { box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.drn-glass--raised  { box-shadow: 0 16px 48px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.15); }
+.drn-glass--sunken  { box-shadow: inset 0 4px 20px rgba(0,0,0,0.3); }
+
+/* Inner shine pseudo-element */
+.drn-glass--shine::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.20) 0%,
+    rgba(255,255,255,0.04) 100%
+  );
+  border-radius: 18px 18px 50% 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Animated shimmer */
+.drn-glass--animated::after {
+  content: '';
+  position: absolute;
+  inset: -100%;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255,255,255,0.12) 50%,
+    transparent 70%
+  );
+  animation: drn-glass-shimmer 4s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes drn-glass-shimmer {
+  from { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+  to   { transform: translateX(100%)  translateY(100%)  rotate(30deg); }
+}
+
+/* Glass Panel component */
+.drn-glass-panel {
+  padding: 1.8rem 2rem;
+  position: relative;
+}
+
+.drn-glass-panel__title {
+  font-family: var(--drn-font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.drn-glass-panel__body {
+  font-family: var(--drn-font-body);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.72);
+}
+
+/* Refraction lens */
+.drn-refract {
+  position: relative;
+  isolation: isolate;
+}
+
+.drn-refract::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px) hue-rotate(calc(var(--drn-hue, 200) * 1deg)) saturate(var(--drn-sat, 80%));
+  -webkit-backdrop-filter: blur(6px) hue-rotate(calc(var(--drn-hue, 200) * 1deg)) saturate(var(--drn-sat, 80%));
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   4. NEUMORPHISM
+   ═══════════════════════════════════════════════════════════════════ */
+
+.drn-neumorphic {
+  --neu-bg:    #e0e5ec;
+  --neu-light: #ffffff;
+  --neu-dark:  #a3b1c6;
+  --neu-dist:  8px;
+  --neu-blur:  20px;
+
+  background: var(--neu-bg);
+  border-radius: 16px;
+  transition: box-shadow var(--drn-t-mid) var(--drn-ease-soft),
+              transform  var(--drn-t-fast) ease;
+}
+
+/* Flat — default, extruded look */
+.drn-neumorphic--flat {
+  box-shadow:
+    var(--neu-dist) var(--neu-dist) var(--neu-blur) var(--neu-dark),
+    calc(var(--neu-dist) * -1) calc(var(--neu-dist) * -1) var(--neu-blur) var(--neu-light);
+}
+
+/* Convex — raised dome */
+.drn-neumorphic--convex {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--neu-bg) 80%, white),
+    color-mix(in srgb, var(--neu-bg) 80%, black 20%)
+  );
+  box-shadow:
+    var(--neu-dist) var(--neu-dist) var(--neu-blur) var(--neu-dark),
+    calc(var(--neu-dist) * -1) calc(var(--neu-dist) * -1) var(--neu-blur) var(--neu-light);
+}
+
+/* Concave — pressed inward */
+.drn-neumorphic--concave {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--neu-bg) 80%, black 20%),
+    color-mix(in srgb, var(--neu-bg) 80%, white)
+  );
+  box-shadow:
+    var(--neu-dist) var(--neu-dist) var(--neu-blur) var(--neu-dark),
+    calc(var(--neu-dist) * -1) calc(var(--neu-dist) * -1) var(--neu-blur) var(--neu-light);
+}
+
+/* Pressed — inverted inset */
+.drn-neumorphic--pressed {
+  box-shadow:
+    inset var(--neu-dist) var(--neu-dist) var(--neu-blur) var(--neu-dark),
+    inset calc(var(--neu-dist) * -1) calc(var(--neu-dist) * -1) var(--neu-blur) var(--neu-light);
+  transform: scale(0.98);
+}
+
+/* Neumorphic Card */
+.drn-neu-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.drn-neu-card__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.drn-neu-card__title {
+  font-family: var(--drn-font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.drn-neu-card__body {
+  font-family: var(--drn-font-body);
+  font-size: 0.9rem;
+  color: #718096;
+  line-height: 1.6;
+}
+
+/* Neumorphic Slider */
+.drn-neu-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+}
+
+.drn-neu-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width:  24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--neu-bg, #e0e5ec);
+  cursor: pointer;
+  box-shadow:
+    4px 4px 10px var(--neu-dark, #a3b1c6),
+    -4px -4px 10px var(--neu-light, #fff);
+  transition: box-shadow var(--drn-t-fast) ease;
+}
+
+.drn-neu-slider::-webkit-slider-thumb:active {
+  box-shadow:
+    inset 2px 2px 6px var(--neu-dark, #a3b1c6),
+    inset -2px -2px 6px var(--neu-light, #fff);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   5. FLOAT — Levitating Objects
+   ═══════════════════════════════════════════════════════════════════ */
+
+.drn-float {
+  display: inline-block;
+  will-change: transform, filter;
+}
+
+/* CSS-only fallback float for elements without JS init */
+.drn-float-css {
+  animation: drn-levitate 4s ease-in-out infinite;
+}
+
+@keyframes drn-levitate {
+  0%,100% { transform: translateY(0px)    rotate(-1deg); }
+  25%     { transform: translateY(-10px)  rotate(0.5deg); }
+  50%     { transform: translateY(-20px)  rotate(1.5deg); }
+  75%     { transform: translateY(-8px)   rotate(-0.5deg); }
+}
+
+/* Orbit — element orbits a center point */
+.drn-orbit {
+  animation: drn-orbit-spin 6s linear infinite;
+  transform-origin: var(--orbit-radius, 80px) 50%;
+}
+
+@keyframes drn-orbit-spin {
+  from { transform: rotate(0deg)   translateX(var(--orbit-radius, 80px)) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(var(--orbit-radius, 80px)) rotate(-360deg); }
+}
+
+/* Particles container */
+.drn-particles-wrap {
+  position:  relative;
+  overflow:  hidden;
+}
+
+.drn-particle {
+  position: absolute;
+  user-select:    none;
+  pointer-events: none;
+  will-change:    transform;
+  line-height: 1;
+}
+
+/* Particle burst (CSS-only fallback) */
+.drn-particle-burst {
+  animation: drn-burst 0.8s var(--drn-ease-spring) forwards;
+}
+
+@keyframes drn-burst {
+  from { transform: scale(0) rotate(0deg); opacity:1; }
+  to   { transform: scale(1) rotate(360deg) translateY(-60px); opacity:0; }
+}
+
+/* Parallax scene */
+.drn-parallax-scene {
+  position: relative;
+}
+
+.drn-parallax-scene [data-depth] {
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+/* Tether — orbiting decorative rings */
+.drn-ring {
+  border-radius: 50%;
+  border: 2px solid rgba(168,85,247,0.3);
+  animation: drn-ring-pulse 3s ease-in-out infinite;
+  position: absolute;
+}
+
+@keyframes drn-ring-pulse {
+  0%,100% { transform: scale(1);    opacity: 0.5; }
+  50%     { transform: scale(1.15); opacity: 0.2; }
+}
+
+/* Floating badge / chip */
+.drn-float-badge {
+  display:     inline-flex;
+  align-items: center;
+  gap:         0.4em;
+  padding:     0.35em 0.9em;
+  border-radius: 99px;
+  font-family: var(--drn-font-body);
+  font-size:   0.8rem;
+  font-weight: 600;
+  background:  linear-gradient(135deg, var(--drn-iris), var(--drn-aurora));
+  color:       var(--drn-white);
+  box-shadow:  0 4px 18px rgba(168,85,247,0.4);
+  animation:   drn-levitate 3.5s ease-in-out infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   6. DREAM — Transitions, Reveals, Cursor, Glitch, Warp
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Page Transition Overlay ─────────────────────────────────────── */
+.drn-dream-overlay {
+  position:   fixed;
+  inset:      0;
+  z-index:    9999;
+  pointer-events: none;
+  opacity:    0;
+}
+
+/* Dissolve */
+.drn-dream--dissolve.drn-dream-overlay--in {
+  background:  var(--drn-void);
+  animation:   drn-fade-in var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+.drn-dream--dissolve.drn-dream-overlay--out {
+  background:  var(--drn-void);
+  animation:   drn-fade-out var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+
+@keyframes drn-fade-in  { from { opacity:0; } to { opacity:1; } }
+@keyframes drn-fade-out { from { opacity:1; } to { opacity:0; } }
+
+/* Vortex */
+.drn-dream--vortex.drn-dream-overlay--in {
+  background: radial-gradient(circle, #5b21b6 0%, #04010d 70%);
+  animation:  drn-vortex-in var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+.drn-dream--vortex.drn-dream-overlay--out {
+  background: radial-gradient(circle, #5b21b6 0%, #04010d 70%);
+  animation:  drn-vortex-out var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+
+@keyframes drn-vortex-in {
+  from { opacity:0; transform: scale(0.1) rotate(-180deg); }
+  to   { opacity:1; transform: scale(1)   rotate(0deg); }
+}
+@keyframes drn-vortex-out {
+  from { opacity:1; transform: scale(1)   rotate(0deg); }
+  to   { opacity:0; transform: scale(0.1) rotate(180deg); }
+}
+
+/* Melt */
+.drn-dream--melt.drn-dream-overlay--in {
+  background: linear-gradient(180deg, var(--drn-aurora), var(--drn-cyan));
+  animation: drn-melt-in var(--drn-t-dream) var(--drn-ease-dream) forwards;
+  transform-origin: top;
+}
+.drn-dream--melt.drn-dream-overlay--out {
+  background: linear-gradient(180deg, var(--drn-aurora), var(--drn-cyan));
+  animation: drn-melt-out var(--drn-t-dream) var(--drn-ease-dream) forwards;
+  transform-origin: top;
+}
+
+@keyframes drn-melt-in  {
+  from { opacity:0; clip-path: inset(0 0 100% 0); }
+  to   { opacity:1; clip-path: inset(0 0 0% 0); }
+}
+@keyframes drn-melt-out {
+  from { opacity:1; clip-path: inset(0 0 0% 0); }
+  to   { opacity:0; clip-path: inset(100% 0 0% 0); }
+}
+
+/* Shatter */
+.drn-dream--shatter.drn-dream-overlay--in {
+  background:
+    repeating-linear-gradient(60deg, rgba(168,85,247,0.15) 0px, rgba(168,85,247,0.15) 1px, transparent 1px, transparent 30px),
+    repeating-linear-gradient(-60deg, rgba(6,182,212,0.1) 0px, rgba(6,182,212,0.1) 1px, transparent 1px, transparent 30px),
+    var(--drn-void);
+  animation: drn-shatter-in var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+.drn-dream--shatter.drn-dream-overlay--out {
+  animation: drn-shatter-out var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+
+@keyframes drn-shatter-in {
+  from { opacity:0; filter: blur(30px); transform: skewX(8deg) scale(1.1); }
+  to   { opacity:1; filter: blur(0);    transform: skewX(0) scale(1); }
+}
+@keyframes drn-shatter-out {
+  from { opacity:1; filter: blur(0);    transform: skewX(0) scale(1); }
+  to   { opacity:0; filter: blur(30px); transform: skewX(-8deg) scale(0.9); }
+}
+
+/* Void */
+.drn-dream--void.drn-dream-overlay--in {
+  background: radial-gradient(ellipse at center, #000 0%, transparent 70%),
+              var(--drn-void);
+  animation: drn-void-in var(--drn-t-dream) var(--drn-ease-dream) forwards;
+}
+.drn-dream--void.drn-dream-overlay--out {
+  animation: drn-void-out var(--drn-t-dream) ease-in forwards;
+}
+
+@keyframes drn-void-in {
+  from { opacity:0; transform: scale(3);  filter: brightness(3); }
+  to   { opacity:1; transform: scale(1);  filter: brightness(1); }
+}
+@keyframes drn-void-out {
+  from { opacity:1; transform: scale(1);  filter: brightness(1); }
+  to   { opacity:0; transform: scale(0);  filter: brightness(0); }
+}
+
+
+/* ── Scroll Reveal Animations ────────────────────────────────────── */
+.drn-reveal { opacity: 0; }
+
+/* fade */
+.drn-reveal--fade.drn-revealed {
+  animation: drn-reveal-fade 0.8s var(--drn-ease-soft) forwards;
+}
+@keyframes drn-reveal-fade {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+
+/* rise */
+.drn-reveal--rise.drn-revealed {
+  animation: drn-reveal-rise 0.8s var(--drn-ease-spring) forwards;
+}
+@keyframes drn-reveal-rise {
+  from { opacity:0; transform: translateY(60px) scale(0.95); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* bloom */
+.drn-reveal--bloom.drn-revealed {
+  animation: drn-reveal-bloom 1s var(--drn-ease-spring) forwards;
+}
+@keyframes drn-reveal-bloom {
+  from { opacity:0; transform: scale(0.5) rotate(-6deg); filter: blur(12px); }
+  to   { opacity:1; transform: scale(1)   rotate(0deg);  filter: blur(0); }
+}
+
+/* glitch */
+.drn-reveal--glitch.drn-revealed {
+  animation: drn-reveal-glitch 0.9s steps(1) forwards;
+}
+@keyframes drn-reveal-glitch {
+  0%  { opacity:0; clip-path: inset(50% 0 50% 0); transform: translateX(-8px); }
+  20% { opacity:1; clip-path: inset(20% 0 20% 0); transform: translateX(6px); }
+  40% { opacity:1; clip-path: inset(0 0 80% 0);   transform: translateX(-4px); }
+  60% { opacity:1; clip-path: inset(0 0 0 0);     transform: translateX(2px); }
+  80% { opacity:1; clip-path: inset(0 0 0 0);     transform: translateX(0); }
+  100%{ opacity:1; clip-path: inset(0 0 0 0);     transform: none; }
+}
+
+/* warp */
+.drn-reveal--warp.drn-revealed {
+  animation: drn-reveal-warp 1.1s var(--drn-ease-dream) forwards;
+}
+@keyframes drn-reveal-warp {
+  from { opacity:0; transform: perspective(500px) rotateX(40deg) scaleY(0.5); filter: blur(16px); }
+  to   { opacity:1; transform: perspective(500px) rotateX(0deg)  scaleY(1);   filter: blur(0); }
+}
+
+
+/* ── Dream Cursor ────────────────────────────────────────────────── */
+.drn-cursor,
+.drn-cursor-trail {
+  position:   fixed;
+  pointer-events: none;
+  z-index:    99999;
+  border-radius: 50%;
+  transform:  translate(-50%, -50%);
+}
+
+.drn-cursor {
+  width:       var(--cursor-size, 14px);
+  height:      var(--cursor-size, 14px);
+  background:  var(--cursor-color, #a855f7);
+  box-shadow:  0 0 12px var(--cursor-color, #a855f7),
+               0 0 30px var(--cursor-color, #a855f7);
+  transition:  width 0.15s ease, height 0.15s ease;
+  mix-blend-mode: screen;
+}
+
+.drn-cursor--pressed {
+  width:  calc(var(--cursor-size, 14px) * 1.8);
+  height: calc(var(--cursor-size, 14px) * 1.8);
+  mix-blend-mode: difference;
+}
+
+.drn-cursor-trail {
+  width:   8px;
+  height:  8px;
+  background: var(--cursor-color, #a855f7);
+  filter:  blur(2px);
+  mix-blend-mode: screen;
+}
+
+
+/* ── Glitch Effect ───────────────────────────────────────────────── */
+.drn-glitch {
+  position: relative;
+  display:  inline-block;
+}
+
+.drn-glitch::before,
+.drn-glitch::after {
+  content:  attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width:  100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.drn-glitch--active::before {
+  color:     #0ff;
+  animation: drn-glitch-before calc(0.1s * var(--glitch-int, 0.5) + 0.05s) steps(1) infinite;
+  opacity:   0.9;
+}
+.drn-glitch--active::after {
+  color:     #f0f;
+  animation: drn-glitch-after  calc(0.1s * var(--glitch-int, 0.5) + 0.07s) steps(1) infinite;
+  opacity:   0.9;
+}
+
+@keyframes drn-glitch-before {
+  0%  { clip-path: inset(0 0 95% 0); transform: translateX(-4px); }
+  25% { clip-path: inset(30% 0 50% 0); transform: translateX(6px); }
+  50% { clip-path: inset(60% 0 20% 0); transform: translateX(-3px); }
+  75% { clip-path: inset(80% 0 5% 0);  transform: translateX(5px); }
+  100%{ clip-path: inset(0 0 0 0);    transform: translateX(0); }
+}
+
+@keyframes drn-glitch-after {
+  0%  { clip-path: inset(10% 0 80% 0); transform: translateX(5px); }
+  33% { clip-path: inset(50% 0 30% 0); transform: translateX(-6px); }
+  66% { clip-path: inset(20% 0 60% 0); transform: translateX(4px); }
+  100%{ clip-path: inset(0 0 0 0);    transform: translateX(0); }
+}
+
+
+/* ── Warp Page Transition ────────────────────────────────────────── */
+.drn-warp-out {
+  animation: drn-warp-body-out 500ms var(--drn-ease-dream) forwards;
+}
+.drn-warp-in {
+  animation: drn-warp-body-in 700ms var(--drn-ease-spring) forwards;
+}
+
+@keyframes drn-warp-body-out {
+  from { filter: blur(0) hue-rotate(0deg); transform: scale(1); }
+  to   { filter: blur(18px) hue-rotate(90deg); transform: scale(1.08); opacity:0; }
+}
+@keyframes drn-warp-body-in {
+  from { filter: blur(18px) hue-rotate(-90deg); transform: scale(0.92); opacity:0; }
+  to   { filter: blur(0) hue-rotate(0deg); transform: scale(1); opacity:1; }
+}
+
+/* Data-page system */
+[data-page] { transition: opacity 0.1s ease; }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   7. UTILITIES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Surreal backgrounds */
+.drn-bg-void      { background: var(--drn-void); }
+.drn-bg-nebula    { background: var(--drn-nebula); }
+
+.drn-bg-aurora {
+  background: linear-gradient(135deg,
+    #0d0621 0%,
+    #1e1b4b 25%,
+    #312e81 50%,
+    #4c1d95 75%,
+    #0d0621 100%
+  );
+}
+
+.drn-bg-drift {
+  background: linear-gradient(-45deg, #0d0621, #1e0f3c, #0c1a3a, #071e22);
+  background-size: 400% 400%;
+  animation: drn-drift 12s ease infinite;
+}
+
+@keyframes drn-drift {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+
+.drn-bg-grid {
+  background-image:
+    linear-gradient(rgba(168,85,247,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,85,247,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.drn-bg-noise::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Typography utilities */
+.drn-text-display {
+  font-family: var(--drn-font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.drn-text-dream {
+  background: linear-gradient(135deg, var(--drn-aurora), var(--drn-cyan), var(--drn-rose));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: drn-text-shift 4s ease infinite;
+}
+
+@keyframes drn-text-shift {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+
+.drn-text-glow {
+  text-shadow:
+    0 0 20px rgba(168,85,247,0.8),
+    0 0 60px rgba(168,85,247,0.4),
+    0 0 120px rgba(168,85,247,0.2);
+}
+
+/* Layout helpers */
+.drn-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drn-abs-fill {
+  position: absolute;
+  inset: 0;
+}
+
+/* Pulse ring */
+.drn-pulse {
+  position: relative;
+}
+.drn-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid var(--drn-aurora);
+  animation: drn-pulse-ring 2s ease-out infinite;
+}
+
+@keyframes drn-pulse-ring {
+  from { transform: scale(1); opacity: 0.8; }
+  to   { transform: scale(1.4); opacity: 0; }
+}
+
+/* Scanlines overlay (retro surreal) */
+.drn-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.06) 2px,
+    rgba(0,0,0,0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Holographic border */
+.drn-holo-border {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--drn-nebula), var(--drn-nebula)) padding-box,
+              linear-gradient(135deg, var(--drn-aurora), var(--drn-cyan), var(--drn-rose), var(--drn-aurora)) border-box;
+  background-size: 100% 100%, 300% 300%;
+  animation: drn-holo-shift 4s linear infinite;
+}
+
+@keyframes drn-holo-shift {
+  from { background-position: 100% 100%, 0% 0%; }
+  to   { background-position: 100% 100%, 100% 100%; }
+}
+
+/* Frosted divider */
+.drn-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(168,85,247,0.4),
+    rgba(6,182,212,0.4),
+    transparent
+  );
+  margin: 2rem 0;
+  border: none;
+}
